@@ -2,6 +2,7 @@ const express = require("express");
 const env = require("dotenv");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { json } = require("body-parser");
 const app = express();
 const routes = express.Router();
 app.use('/api',routes);
@@ -9,8 +10,8 @@ app.use('/api',routes);
 // body-parser
 routes.use(bodyParser.urlencoded({ extended: false }));
 routes.use(bodyParser.json());
-
-//dotenv config 
+const jsonParser = bodyParser.json();
+//dotenv config constante connexion
 env.config();
  
 //cors
@@ -38,17 +39,33 @@ client.connect((err) => {
   
   routes.get("/products", (req, res ) => {
     products
-    .find()
-    .toArray()
-    .then((error, results) => {
-      if (error) {
-        return res.send(error) 
-      }
-      res.status(200).send({results});
-    }).catch((err) => res.send(err));
-
+      .find()
+      .toArray()
+      .then((error, results) => {
+        if (error) {
+          return res.send(error);
+        }
+        res.status(200).send( {results} );
+      })
+      .catch((err) => res.send(error));
   });
 
+  const exempleObj = {
+    "id": 19999,
+    "category": "Clothes",
+    "name": "Winter Jacket for women, All sizes",
+    "price": 899
+  };
+
+  routes.post("/products/add",jsonParser, function (req, res) {
+    products
+      .insertOne(req.body)
+      .then(() => res.status(200).send(`successfully inserted new document`))
+      .catch((err) => {
+        console.log(err);
+        res.send(err);
+      })
+  })
 });
 
 // routes
